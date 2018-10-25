@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="DragonMZJUI.View.OperatePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DragonMZJUI.View"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="200">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition Height="20"></RowDefinition>
+        </Grid.RowDefinitions>
+        <TextBox Grid.Row="1" x:Name="MsgTextBox" IsReadOnly="True" TextChanged="MsgTextBox_TextChanged"  FontSize="14" Background="Black" FontFamily="宋体" Foreground="White" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" BorderThickness="0"></TextBox>
+        <Grid Grid.Row="2" Background="Black">
+            <StackPanel Orientation="Horizontal"  HorizontalAlignment="Right">
+                <TextBlock Text="PLC" Foreground="White" VerticalAlignment="Center"></TextBlock>
+                <Ellipse x:Name="PlcConnect" Height="20" Margin="10,0" Width="20" Fill="Red"></Ellipse>
+            </StackPanel>
+        </Grid>
+        <Grid x:Name="OperatePageGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Button Click="GrapButtonClick" Content="拍照" Width="60" Height="30"></Button>
+            <Button Click="ProcessButtonClick" Content="处理" Grid.Row="1" Width="60" Height="30"></Button>
+            <Button Click="OpenButtonClick" Content="打开" Grid.Row="2" Width="60" Height="30"></Button>
+            <Button Click="SaveButtonClick" Grid.Column="1" Content="保存" Grid.Row="2" Width="60" Height="30"></Button>
+            <Button Click="ReOpenCameraButtonClick" Content="重连" Grid.Column="1" Width="60" Height="30"></Button>
+            <!--<Button x:Name="button1" Click="Button_Click"></Button>-->
+        </Grid>
+     
+
+    </Grid>
+</UserControl>
