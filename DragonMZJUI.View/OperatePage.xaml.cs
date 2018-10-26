@@ -52,6 +52,11 @@ namespace DragonMZJUI.View
         {
             GlobalVar.plc.vision.GetImage1();
         }
+        private void GrapButtonClick2(object sender, RoutedEventArgs e)
+        {
+            GlobalVar.plc.vision.GetImage2();
+        }
+        
         private void ReOpenCameraButtonClick(object sender, RoutedEventArgs e)
         {
             GlobalVar.plc.vision.CloseCamera();

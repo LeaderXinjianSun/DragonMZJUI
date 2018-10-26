@@ -13,7 +13,7 @@ namespace DragonMZJUI.Model
     {
         public HWindow window1;
         public HDevEngine myEngine = new HDevEngine();
-        public HDevProcedureCall cam1ProcedureCall;
+        public HDevProcedureCall cam1ProcedureCall1, cam1ProcedureCall2;
         public bool CCDStatus = false;
         //C:/Program Files/MVTec/HALCON-13.0/procedures/
         public Vision()
@@ -28,7 +28,8 @@ namespace DragonMZJUI.Model
                 //视觉脚本程序加载
                 HDevProgram myProgram = new HDevProgram(path + "\\Main.hdev");
                 //将过程挂载到视觉脚本
-                cam1ProcedureCall = new HDevProcedureCall(new HDevProcedure(myProgram, "HS9Operate"));
+                cam1ProcedureCall1 = new HDevProcedureCall(new HDevProcedure(myProgram, "TileImage"));
+                cam1ProcedureCall2 = new HDevProcedureCall(new HDevProcedure(myProgram, "HS9Operate"));
                 OpenCameraAsync();
             }
             catch (Exception ex)
@@ -62,6 +63,7 @@ namespace DragonMZJUI.Model
         }
         public HImage Image1 = null;
         public HImage Image2 = null;
+        public HImage TiledImage = null;
         HFramegrabber Framegrabber;
         public async void OpenCameraAsync()
         {
@@ -135,25 +137,48 @@ namespace DragonMZJUI.Model
             }
             catch (Exception ex) { GlobalVar.AddMessage(ex.Message); }
         }
+        public bool[] Result_etch, Result_blue;
         public void ProcessImage()
         {
+            Result_etch = new bool[10];
+            Result_blue = new bool[10];
             try
             {
-                if (Image1 != null)
+                if (Image1 != null && Image2 != null)
                 {
-                    cam1ProcedureCall.SetInputIconicParamObject("Image", Image1);//传入图像
-                    cam1ProcedureCall.Execute();
-                    HRegion Rectangle10 = cam1ProcedureCall.GetOutputIconicParamRegion("Rectangle10");
-                    HRegion Rectangle11 = cam1ProcedureCall.GetOutputIconicParamRegion("Rectangle11");
+                    cam1ProcedureCall1.SetInputIconicParamObject("image1", Image1);
+                    cam1ProcedureCall1.SetInputIconicParamObject("image2", Image2);
+                    cam1ProcedureCall1.Execute();
+                    TiledImage?.Dispose();
+                    TiledImage = cam1ProcedureCall1.GetOutputIconicParamImage("TiledImage");
+                    GlobalVar.hWndCtrl.addIconicVar(TiledImage);
+                    GlobalVar.hWndCtrl.repaint();
+                    cam1ProcedureCall2.SetInputIconicParamObject("Image", TiledImage);//传入图像
+                    cam1ProcedureCall2.Execute();
+                    HRegion Rectangle10 = cam1ProcedureCall2.GetOutputIconicParamRegion("Rectangle10");
+                    HRegion Rectangle11 = cam1ProcedureCall2.GetOutputIconicParamRegion("Rectangle11");
                     window1.SetColor("red");
                     window1.DispRegion(Rectangle10);
                     window1.SetColor("green");
                     window1.DispRegion(Rectangle11);
-                    HTuple Result_etch = cam1ProcedureCall.GetOutputCtrlParamTuple("Result_etch");
-                    HTuple Result_blue = cam1ProcedureCall.GetOutputCtrlParamTuple("Result_blue");
-                    GlobalVar.AddMessage("蚀刻: " + Result_etch.ToString());
-                    GlobalVar.AddMessage("蓝膜: " + Result_blue.ToString());
+                    HTuple result_etch = cam1ProcedureCall2.GetOutputCtrlParamTuple("Result_etch");
+                    HTuple result_blue = cam1ProcedureCall2.GetOutputCtrlParamTuple("Result_blue");
+                    GlobalVar.AddMessage("蚀刻:");
+                    foreach (int item in result_etch.IArr)
+                    {
+                        GlobalVar.AddMessage(item.ToString());
+                    }
+                    GlobalVar.AddMessage("蓝膜:");
+                    foreach (int item in result_blue.IArr)
+                    {
+                        GlobalVar.AddMessage(item.ToString());
+                    }
                     GlobalVar.AddMessage("图像处理完成");
+                    for (int i = 0; i < Result_etch.Length && i < result_etch.IArr.Length && i < result_blue.IArr.Length; i++)
+                    {
+                        Result_etch[i] = result_etch[i];
+                        Result_blue[i] = result_blue[i];
+                    }
                 }
                 else
                 {

@@ -15,8 +15,6 @@ namespace DragonMZJUI.Model
         Delta_ModbusASCII plc;
         public Vision vision;
         
-        bool[] Plc1In = new bool[32];
-        bool[] Plc1Out;
         public bool Connect = false;
         public DeltaPLC()
         {
@@ -50,6 +48,7 @@ namespace DragonMZJUI.Model
                             int intM2225 = Convert.ToInt32(M2225, 16);
                             if ((intM2225 & 1) == 1)
                             {
+                                GlobalVar.AddMessage("触发拍照1");
                                 System.Threading.Thread.Sleep(20);
                                 plc.PLCWrite(STATE, "M2225", "0000");
                                 System.Threading.Thread.Sleep(20);
@@ -64,12 +63,22 @@ namespace DragonMZJUI.Model
                             int intM2226 = Convert.ToInt32(M2226, 16);
                             if ((intM2226 & 1) == 1)
                             {
+                                GlobalVar.AddMessage("触发拍照2");
                                 System.Threading.Thread.Sleep(20);
                                 plc.PLCWrite(STATE, "M2226", "0000");
                                 System.Threading.Thread.Sleep(20);
                                 plc.PLCWrite(STATE, "M2231", "0000");
                                 GlobalVar.plc.vision.GetImage2();
+                                GlobalVar.plc.vision.ProcessImage();
+                                string Str_Result_etch = GetCoilStr(GlobalVar.plc.vision.Result_etch);
+                                System.Threading.Thread.Sleep(20);
+                                plc.PLCWriteBit(STATE, "M2213", "000A", Str_Result_etch);
+                                string Str_Result_blue = GetCoilStr(GlobalVar.plc.vision.Result_blue);
+                                System.Threading.Thread.Sleep(20);
+                                plc.PLCWriteBit(STATE, "M2201", "000A", Str_Result_blue);
+                                System.Threading.Thread.Sleep(20);
                                 plc.PLCWrite(STATE, "M2231", "FF00");
+                                GlobalVar.AddMessage("拍照结果写入PLC");
                             }
                             //System.Threading.Thread.Sleep(20);
                             //Plc1Out = GetCoilArray(Plc1OutStr, 10);
