@@ -159,7 +159,7 @@ namespace DragonMZJUI.Model
                     HRegion Rectangle11 = cam1ProcedureCall2.GetOutputIconicParamRegion("Rectangle11");
                     window1.SetColor("red");
                     window1.DispRegion(Rectangle10);
-                    window1.SetColor("green");
+                    window1.SetColor("red");
                     window1.DispRegion(Rectangle11);
                     HTuple result_etch = cam1ProcedureCall2.GetOutputCtrlParamTuple("Result_etch");
                     HTuple result_blue = cam1ProcedureCall2.GetOutputCtrlParamTuple("Result_blue");
