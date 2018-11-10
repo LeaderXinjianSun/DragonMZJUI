@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DragonMZJUI.View"
         mc:Ignorable="d"
-        Title="DragonMZJUI 2018110201" Height="600" Width="800" WindowStartupLocation="CenterScreen"
+        Title="DragonMZJUI 2018111001" Height="600" Width="800" WindowStartupLocation="CenterScreen"
         Icon="Google_Earth_globe_64px_568339_easyicon.net.ico" Loaded="Window_Loaded" MouseRightButtonDown="ControlGrid_PreviewMouseRightButtonDown">
     <Grid>
         <Grid.ColumnDefinitions>

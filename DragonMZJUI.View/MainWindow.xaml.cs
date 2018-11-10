@@ -35,7 +35,7 @@ namespace DragonMZJUI.View
             LastBanci = Inifile.INIGetStringValue(iniParameterPath, "System", "Banci", "0");
             
             dispatcherTimer.Tick += new EventHandler(DispatcherTimerTickUpdateUi);
-            dispatcherTimer.Interval = new TimeSpan(0, 1, 0);
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
             dispatcherTimer.Start();
         }
         private void DispatcherTimerTickUpdateUi(Object sender, EventArgs e)
@@ -45,8 +45,17 @@ namespace DragonMZJUI.View
             {
                 LastBanci = banci;
                 Inifile.INIWriteValue(iniParameterPath, "System", "Banci", LastBanci);
+                //GlobalVar.AlarmRecordQueue.Clear();
                 GlobalVar.AlarmRecord.Clear();
                 GlobalVar.AddMessage("换班数据清空" + LastBanci);
+            }
+            if (GlobalVar.AlarmRecordQueue.Count > 0)
+            {
+                foreach (AlarmTableItem item in GlobalVar.AlarmRecordQueue)
+                {
+                    GlobalVar.AlarmRecord.Add(item);
+                }
+                GlobalVar.AlarmRecordQueue.Clear();
             }
         }
         private void ReadAlarmRecordfromCSV()
@@ -70,7 +79,8 @@ namespace DragonMZJUI.View
                             AlarmTableItem tr = new AlarmTableItem() { AlarmDate = item[0].ToString(), MachineID = item[1].ToString(), UserID = item[2].ToString(), AlarmMessage = item[3].ToString() };
                             lock (GlobalVar.obj)
                             {
-                                GlobalVar.AlarmRecord.Add(tr);
+                                //GlobalVar.AlarmRecord.Add(tr);
+                                GlobalVar.AlarmRecordQueue.Enqueue(tr);
                             }
                         }
                         GlobalVar.AddMessage("读取报警记录完成");

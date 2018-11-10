@@ -22,6 +22,7 @@ namespace DragonMZJUI.Model
         public static ROIController rOIController;
         public static string MessageStr = "";
         public static ObservableCollection<AlarmTableItem> AlarmRecord = new ObservableCollection<AlarmTableItem>();
+        public static Queue<AlarmTableItem> AlarmRecordQueue = new Queue<AlarmTableItem>();
         public static string MachineID;
         public static string UserID;
         public static void AddMessage(string str)

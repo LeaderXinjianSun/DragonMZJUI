@@ -101,7 +101,7 @@ namespace DragonMZJUI.Model
                                 if (AlarmTupleArray[i].LastCoilStatus != AlarmTupleArray[i].CoilStatus)
                                 {
                                     AlarmTupleArray[i].LastCoilStatus = AlarmTupleArray[i].CoilStatus;
-                                    if (AlarmTupleArray[i].CoilStatus && first)
+                                    if (AlarmTupleArray[i].CoilStatus && !first)
                                     {
                                         AlarmTableItem _alarmTableItem = new AlarmTableItem();
                                         _alarmTableItem.AlarmDate = DateTime.Now.ToString();
@@ -110,9 +110,9 @@ namespace DragonMZJUI.Model
                                         _alarmTableItem.UserID = GlobalVar.UserID;
 
                                         lock (GlobalVar.obj)
-                                        {
-                                            GlobalVar.AlarmRecord.Add(_alarmTableItem);
-                                        }
+                                            GlobalVar.AlarmRecordQueue.Enqueue(_alarmTableItem);
+                                      
+                                        
                                         SaveCSVfileAlarm(_alarmTableItem.AlarmMessage);
 
                                         //记录报警
