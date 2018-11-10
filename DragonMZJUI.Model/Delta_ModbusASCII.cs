@@ -392,7 +392,13 @@ namespace DXH.PLC
             }
 
         }
-
+        public bool ReadM(string mDevIndex, string mDevAdd)
+        {
+            string temps = PLCRead(mDevIndex, mDevAdd);
+            int tempi = Convert.ToInt32(temps, 16);
+            tempi = tempi & 1;
+            return tempi == 1 ? true : false;
+        }
         public string PLCRead(string mDevIndex, string mDevAdd, string mByteToRead = "0001", bool mHex = false)
         {
             if (!SerialPort1.IsOpen)
@@ -421,6 +427,12 @@ namespace DXH.PLC
                         m += 43520;
                     else
                         m += 2048;
+                    mAddress = m.ToString("X4");
+                    break;
+                case "T":
+                    mModBus = "01";
+                    m = Convert.ToInt32(mAddress);
+                    m += 1536;
                     mAddress = m.ToString("X4");
                     break;
                 case "X":

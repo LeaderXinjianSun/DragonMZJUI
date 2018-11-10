@@ -6,13 +6,22 @@
         xmlns:local="clr-namespace:DragonMZJUI.View"
         mc:Ignorable="d"
         Title="DragonMZJUI 2018110201" Height="600" Width="800" WindowStartupLocation="CenterScreen"
-        Icon="Google_Earth_globe_64px_568339_easyicon.net.ico" Loaded="Window_Loaded">
+        Icon="Google_Earth_globe_64px_568339_easyicon.net.ico" Loaded="Window_Loaded" MouseRightButtonDown="ControlGrid_PreviewMouseRightButtonDown">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*"></ColumnDefinition>
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <local:CameraPage></local:CameraPage>
-        <local:OperatePage Grid.Column="1"></local:OperatePage>
+
+        <Grid x:Name="CameraPageGrid">
+            <local:CameraPage></local:CameraPage>
+        </Grid>
+        <local:BigDataPage></local:BigDataPage>
+
+        <Grid Grid.Column="1">
+            <local:OperatePage></local:OperatePage>
+        </Grid>
+        
+        
     </Grid>
 </Window>

@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using DXH.PLC;
 using BingLibrary.hjb;
+using System.IO;
+using OfficeOpenXml;
+using BingLibrary.hjb.file;
 
 namespace DragonMZJUI.Model
 {
@@ -18,16 +21,36 @@ namespace DragonMZJUI.Model
         public bool Connect = false;
         public DeltaPLC()
         {
-            vision = new Vision();
+            
             COM = Inifile.INIGetStringValue(iniParameterPath, "System", "COM", "COM1");
             STATE = Inifile.INIGetStringValue(iniParameterPath, "System", "STATE", "01");
             plc = new Delta_ModbusASCII(COM, 19200, System.IO.Ports.Parity.Even, 7, System.IO.Ports.StopBits.One);
             PlcRun();
+            vision = new Vision();
+            
+
         }
         async void PlcRun()
         {
             short QuestCycle = 100;
             bool state1 = false;
+            bool first = true;
+
+            AlarmTuple[] AlarmTupleArray = new AlarmTuple[200];
+            int alramItemsCount = 0;
+            string alarmconfigfile = System.Environment.CurrentDirectory + "\\CA9报警.xlsx";
+
+            try
+            {
+                alramItemsCount = UpdateAlarmFromExcel(alarmconfigfile, AlarmTupleArray);
+                GlobalVar.AddMessage("加载报警项：" + alramItemsCount.ToString());
+            }
+            catch (Exception ex)
+            {
+                GlobalVar.AddMessage(ex.Message);
+            }
+
+
             while (true)
             {
                 await Task.Delay(QuestCycle);
@@ -35,18 +58,12 @@ namespace DragonMZJUI.Model
                 {
                     try
                     {
-                        string M1000 = plc.PLCRead(STATE, "M1000");
-  
-                        int intM1000 = Convert.ToInt32(M1000, 16);
-                        state1 = (intM1000 & 1) == 1;
+                        state1 = plc.ReadM(STATE, "M1000");                         
                         if (state1)
                         {
                             //拍照1
-                            System.Threading.Thread.Sleep(20);
-                            string M2225 = plc.PLCRead(STATE, "M2225");
-                            
-                            int intM2225 = Convert.ToInt32(M2225, 16);
-                            if ((intM2225 & 1) == 1)
+                            System.Threading.Thread.Sleep(20);                            
+                            if (plc.ReadM(STATE, "M2225"))
                             {
                                 GlobalVar.AddMessage("触发拍照1");
                                 System.Threading.Thread.Sleep(20);
@@ -58,10 +75,7 @@ namespace DragonMZJUI.Model
                             }
                             //拍照2
                             System.Threading.Thread.Sleep(20);
-                            string M2226 = plc.PLCRead(STATE, "M2226");
-
-                            int intM2226 = Convert.ToInt32(M2226, 16);
-                            if ((intM2226 & 1) == 1)
+                            if (plc.ReadM(STATE, "M2226"))
                             {
                                 GlobalVar.AddMessage("触发拍照2");
                                 System.Threading.Thread.Sleep(20);
@@ -80,10 +94,33 @@ namespace DragonMZJUI.Model
                                 plc.PLCWrite(STATE, "M2231", "FF00");
                                 GlobalVar.AddMessage("拍照结果写入PLC");
                             }
-                            //System.Threading.Thread.Sleep(20);
-                            //Plc1Out = GetCoilArray(Plc1OutStr, 10);
-                            //string Plc1InStr = GetCoilStr(Plc1In);
-                            //plc.PLCWriteBit(STATE, "M910", "000A", Plc1InStr);
+                            //报警
+                            for (int i = 0; i < alramItemsCount; i++)
+                            {
+                                AlarmTupleArray[i].CoilStatus = plc.ReadM(STATE, AlarmTupleArray[i].CoilName);
+                                if (AlarmTupleArray[i].LastCoilStatus != AlarmTupleArray[i].CoilStatus)
+                                {
+                                    AlarmTupleArray[i].LastCoilStatus = AlarmTupleArray[i].CoilStatus;
+                                    if (AlarmTupleArray[i].CoilStatus && first)
+                                    {
+                                        AlarmTableItem _alarmTableItem = new AlarmTableItem();
+                                        _alarmTableItem.AlarmDate = DateTime.Now.ToString();
+                                        _alarmTableItem.AlarmMessage = AlarmTupleArray[i].AlarmContent;
+                                        _alarmTableItem.MachineID = GlobalVar.MachineID;
+                                        _alarmTableItem.UserID = GlobalVar.UserID;
+
+                                        lock (GlobalVar.obj)
+                                        {
+                                            GlobalVar.AlarmRecord.Add(_alarmTableItem);
+                                        }
+                                        SaveCSVfileAlarm(_alarmTableItem.AlarmMessage);
+
+                                        //记录报警
+                                    }
+                                }
+
+                            }
+                            first = false;
                         }
                         QuestCycle = 100;
                     }
@@ -96,6 +133,29 @@ namespace DragonMZJUI.Model
                 });
                 await task;
                 Connect = state1;
+
+            }
+        }
+        private void SaveCSVfileAlarm(string alrstr)
+        {
+            string filepath = "D:\\报警记录\\报警记录" + GlobalVar.GetBanci() + ".csv";
+            if (!Directory.Exists("D:\\报警记录"))
+            {
+                Directory.CreateDirectory("D:\\报警记录");
+            }
+            try
+            {
+                if (!File.Exists(filepath))
+                {
+                    string[] heads = { "AlarmDate", "MachineID", "UserID", "AlarmMessage" };
+                    Csvfile.AddNewLine(filepath, heads);
+                }
+                string[] conte = { System.DateTime.Now.ToString(), GlobalVar.MachineID, GlobalVar.UserID, alrstr };
+                Csvfile.AddNewLine(filepath, conte);
+            }
+            catch (Exception ex)
+            {
+                GlobalVar.AddMessage(ex.Message);
             }
         }
         private bool[] GetCoilArray(string s, int length)
@@ -145,5 +205,41 @@ namespace DragonMZJUI.Model
             }
             return modbusStr;
         }
+        private int UpdateAlarmFromExcel(string filename, AlarmTuple[] alarmTupleArray)
+        {
+            int itemsCount = 0;
+            FileInfo existingFile = new FileInfo(filename);
+            using (ExcelPackage package = new ExcelPackage(existingFile))
+            {
+                // get the first worksheet in the workbook
+                ExcelWorksheet worksheet = package.Workbook.Worksheets[1];
+
+                int rowCount = worksheet.Dimension.End.Row;
+                int colCount = worksheet.Dimension.End.Column;
+                for (int i = 1; i <= rowCount; i++)
+                {
+                    if (worksheet.Cells[i, 1] != null && worksheet.Cells[i, 1].Value != null && worksheet.Cells[i, 2] != null && worksheet.Cells[i, 2].Value != null)
+                    {
+                        alarmTupleArray[itemsCount].CoilName = worksheet.Cells[i, 1].Value.ToString();
+                        alarmTupleArray[itemsCount].AlarmContent = worksheet.Cells[i, 2].Value.ToString();
+                        alarmTupleArray[itemsCount].CoilStatus = false;
+                        alarmTupleArray[itemsCount].LastCoilStatus = false;
+                        itemsCount++;
+                    }
+
+                }
+
+            }
+
+            return itemsCount;
+        }
+        
+    }
+    public struct AlarmTuple
+    {
+        public string CoilName;
+        public bool CoilStatus;
+        public bool LastCoilStatus;
+        public string AlarmContent;
     }
 }

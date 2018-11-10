@@ -40,7 +40,7 @@ namespace DragonMZJUI.View
         {
             PlcConnect.Fill =  GlobalVar.plc.Connect ? System.Windows.Media.Brushes.Green : System.Windows.Media.Brushes.Red;
             MsgTextBox.Text = GlobalVar.MessageStr;
-            OperatePageGrid.IsEnabled = GlobalVar.plc.vision.CCDStatus;
+            //OperatePageGrid.IsEnabled = GlobalVar.plc.vision.CCDStatus;
             if (first && GlobalVar.plc.vision.CCDStatus)
             {
                 first = false;
@@ -87,6 +87,16 @@ namespace DragonMZJUI.View
             if (opf.ShowDialog() == DialogResult.OK)
             {
                 GlobalVar.plc.vision.OpenImage(opf.FileName);
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            GlobalVar.AlarmRecord.Add(new AlarmTableItem() { AlarmDate = System.DateTime.Now.ToString(), AlarmMessage="12323" });
+            if (GlobalVar.AlarmRecord.Count > 4)
+            {
+
+                GlobalVar.AlarmRecord.Clear();
             }
         }
     }

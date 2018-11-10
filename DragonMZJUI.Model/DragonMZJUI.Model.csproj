@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EPPlus">
+      <HintPath>..\EPPlus.dll</HintPath>
+    </Reference>
     <Reference Include="halcondotnet, Version=13.0.0.0, Culture=neutral, PublicKeyToken=4973bed59ddbf2b8, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\MVTec\HALCON-13.0\bin\dotnet35\halcondotnet.dll</HintPath>
@@ -48,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Csvfile.cs" />
     <Compile Include="DeltaPLC.cs" />
     <Compile Include="Delta_ModbusASCII.cs" />
     <Compile Include="GlobalVar.cs" />

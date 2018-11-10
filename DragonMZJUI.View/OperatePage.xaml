@@ -36,6 +36,7 @@
             <Button Click="OpenButtonClick" Content="打开" Grid.Row="2" Width="60" Height="30"></Button>
             <Button Click="SaveButtonClick" Grid.Column="1" Content="保存" Grid.Row="2" Width="60" Height="30"></Button>
             <Button Click="ReOpenCameraButtonClick" Content="重连" Grid.Row="1" Grid.Column="1" Width="60" Height="30"></Button>
+            <!--<Button Click="Button_Click" Content="重连" Grid.Row="3" Grid.Column="1" Width="60" Height="30"></Button>-->
             <!--<Button x:Name="button1" Click="Button_Click"></Button>-->
         </Grid>
      
