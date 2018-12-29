@@ -63,25 +63,25 @@ namespace DragonMZJUI.Model
                         {
                             //拍照1
                             System.Threading.Thread.Sleep(20);                            
-                            if (plc.ReadM(STATE, "M2225"))
+                            if (plc.ReadM(STATE, "M120"))
                             {
                                 GlobalVar.AddMessage("触发拍照1");
                                 System.Threading.Thread.Sleep(20);
-                                plc.PLCWrite(STATE, "M2225", "0000");
+                                plc.PLCWrite(STATE, "M120", "0000");
                                 System.Threading.Thread.Sleep(20);
-                                plc.PLCWrite(STATE, "M2231", "0000");
+                                plc.PLCWrite(STATE, "M980", "0000");
                                 GlobalVar.plc.vision.GetImage1();
-                                plc.PLCWrite(STATE, "M2231", "FF00");
+                                plc.PLCWrite(STATE, "M980", "FF00");
                             }
                             //拍照2
                             System.Threading.Thread.Sleep(20);
-                            if (plc.ReadM(STATE, "M2226"))
+                            if (plc.ReadM(STATE, "M982"))
                             {
                                 GlobalVar.AddMessage("触发拍照2");
                                 System.Threading.Thread.Sleep(20);
-                                plc.PLCWrite(STATE, "M2226", "0000");
+                                plc.PLCWrite(STATE, "M982", "0000");
                                 System.Threading.Thread.Sleep(20);
-                                plc.PLCWrite(STATE, "M2231", "0000");
+                                plc.PLCWrite(STATE, "M129", "0000");
                                 GlobalVar.plc.vision.GetImage2();
                                 GlobalVar.plc.vision.ProcessImage();
                                 string Str_Result_etch = GetCoilStr(GlobalVar.plc.vision.Result_etch);
@@ -91,7 +91,7 @@ namespace DragonMZJUI.Model
                                 System.Threading.Thread.Sleep(20);
                                 plc.PLCWriteBit(STATE, "M2201", "000A", Str_Result_blue);
                                 System.Threading.Thread.Sleep(20);
-                                plc.PLCWrite(STATE, "M2231", "FF00");
+                                plc.PLCWrite(STATE, "M129", "FF00");
                                 GlobalVar.AddMessage("拍照结果写入PLC");
                             }
                             //报警
