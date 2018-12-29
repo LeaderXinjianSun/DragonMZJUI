@@ -8,6 +8,7 @@ using BingLibrary.hjb;
 using System.IO;
 using OfficeOpenXml;
 using BingLibrary.hjb.file;
+using SxjLibrary;
 
 namespace DragonMZJUI.Model
 {
@@ -17,7 +18,7 @@ namespace DragonMZJUI.Model
         string iniParameterPath = System.Environment.CurrentDirectory + "\\Parameter.ini";
         Delta_ModbusASCII plc;
         public Vision vision;
-        
+        public Scan ScanC;
         public bool Connect = false;
         public DeltaPLC()
         {
@@ -25,6 +26,10 @@ namespace DragonMZJUI.Model
             COM = Inifile.INIGetStringValue(iniParameterPath, "System", "COM", "COM1");
             STATE = Inifile.INIGetStringValue(iniParameterPath, "System", "STATE", "01");
             plc = new Delta_ModbusASCII(COM, 19200, System.IO.Ports.Parity.Even, 7, System.IO.Ports.StopBits.One);
+            ScanC = new Scan();
+            string ScanCom = Inifile.INIGetStringValue(iniParameterPath, "System", "扫码枪串口", "COM1");
+            ScanC.ini(ScanCom);
+            ScanC.Connect();
             PlcRun();
             vision = new Vision();
             
@@ -94,6 +99,17 @@ namespace DragonMZJUI.Model
                                 plc.PLCWrite(STATE, "M129", "FF00");
                                 GlobalVar.AddMessage("拍照结果写入PLC");
                             }
+                            if (plc.ReadM(STATE, "M260"))
+                            {
+                                GlobalVar.AddMessage("触发扫码");
+                                System.Threading.Thread.Sleep(20);
+                                plc.PLCWrite(STATE, "M260", "0000");
+                                System.Threading.Thread.Sleep(20);
+                                plc.PLCWrite(STATE, "M262", "0000");
+                                System.Threading.Thread.Sleep(20);
+                                plc.PLCWrite(STATE, "M264", "0000");
+                                ScanC.GetBarCode(PLCScanBCallback);
+                            }
                             //报警
                             for (int i = 0; i < alramItemsCount; i++)
                             {
@@ -120,6 +136,7 @@ namespace DragonMZJUI.Model
                                 }
 
                             }
+
                             first = false;
                         }
                         QuestCycle = 100;
@@ -134,6 +151,42 @@ namespace DragonMZJUI.Model
                 await task;
                 Connect = state1;
 
+            }
+        }
+        void PLCScanBCallback(string bar)
+        {
+            GlobalVar.AddMessage(bar);
+            if (bar != "Error")
+            {
+                plc.PLCWrite(STATE, "M262", "FF00");
+                
+            }
+            else
+            {
+                plc.PLCWrite(STATE, "M264", "FF00");
+            }
+            SaveCSVfileBarcode(bar);
+        }
+        private void SaveCSVfileBarcode(string bar)
+        {
+            string filepath = "D:\\生产记录\\条码" + GlobalVar.GetBanci() + ".csv";
+            if (!Directory.Exists("D:\\生产记录"))
+            {
+                Directory.CreateDirectory("D:\\生产记录");
+            }
+            try
+            {
+                if (!File.Exists(filepath))
+                {
+                    string[] heads = { "Date", "Barcode"};
+                    Csvfile.AddNewLine(filepath, heads);
+                }
+                string[] conte = { System.DateTime.Now.ToString(), bar };
+                Csvfile.AddNewLine(filepath, conte);
+            }
+            catch (Exception ex)
+            {
+                GlobalVar.AddMessage(ex.Message);
             }
         }
         private void SaveCSVfileAlarm(string alrstr)
