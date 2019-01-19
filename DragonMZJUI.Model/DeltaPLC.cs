@@ -28,8 +28,8 @@ namespace DragonMZJUI.Model
             plc = new Delta_ModbusASCII(COM, 19200, System.IO.Ports.Parity.Even, 7, System.IO.Ports.StopBits.One);
             ScanC = new Scan();
             string ScanCom = Inifile.INIGetStringValue(iniParameterPath, "System", "扫码枪串口", "COM1");
-            ScanC.ini(ScanCom);
-            ScanC.Connect();
+            //ScanC.ini(ScanCom);
+            //ScanC.Connect();
             PlcRun();
             vision = new Vision();
             
@@ -99,17 +99,17 @@ namespace DragonMZJUI.Model
                                 plc.PLCWrite(STATE, "M129", "FF00");
                                 GlobalVar.AddMessage("拍照结果写入PLC");
                             }
-                            if (plc.ReadM(STATE, "M260"))
-                            {
-                                GlobalVar.AddMessage("触发扫码");
-                                System.Threading.Thread.Sleep(20);
-                                plc.PLCWrite(STATE, "M260", "0000");
-                                System.Threading.Thread.Sleep(20);
-                                plc.PLCWrite(STATE, "M262", "0000");
-                                System.Threading.Thread.Sleep(20);
-                                plc.PLCWrite(STATE, "M264", "0000");
-                                ScanC.GetBarCode(PLCScanBCallback);
-                            }
+                            //if (plc.ReadM(STATE, "M260"))
+                            //{
+                            //    GlobalVar.AddMessage("触发扫码");
+                            //    System.Threading.Thread.Sleep(20);
+                            //    plc.PLCWrite(STATE, "M260", "0000");
+                            //    System.Threading.Thread.Sleep(20);
+                            //    plc.PLCWrite(STATE, "M262", "0000");
+                            //    System.Threading.Thread.Sleep(20);
+                            //    plc.PLCWrite(STATE, "M264", "0000");
+                            //    ScanC.GetBarCode(PLCScanBCallback);
+                            //}
                             //报警
                             for (int i = 0; i < alramItemsCount; i++)
                             {
@@ -153,42 +153,42 @@ namespace DragonMZJUI.Model
 
             }
         }
-        void PLCScanBCallback(string bar)
-        {
-            GlobalVar.AddMessage(bar);
-            if (bar != "Error")
-            {
-                plc.PLCWrite(STATE, "M262", "FF00");
+        //void PLCScanBCallback(string bar)
+        //{
+        //    GlobalVar.AddMessage(bar);
+        //    if (bar != "Error")
+        //    {
+        //        plc.PLCWrite(STATE, "M262", "FF00");
                 
-            }
-            else
-            {
-                plc.PLCWrite(STATE, "M264", "FF00");
-            }
-            SaveCSVfileBarcode(bar);
-        }
-        private void SaveCSVfileBarcode(string bar)
-        {
-            string filepath = "D:\\生产记录\\条码" + GlobalVar.GetBanci() + ".csv";
-            if (!Directory.Exists("D:\\生产记录"))
-            {
-                Directory.CreateDirectory("D:\\生产记录");
-            }
-            try
-            {
-                if (!File.Exists(filepath))
-                {
-                    string[] heads = { "Date", "Barcode"};
-                    Csvfile.AddNewLine(filepath, heads);
-                }
-                string[] conte = { System.DateTime.Now.ToString(), bar };
-                Csvfile.AddNewLine(filepath, conte);
-            }
-            catch (Exception ex)
-            {
-                GlobalVar.AddMessage(ex.Message);
-            }
-        }
+        //    }
+        //    else
+        //    {
+        //        plc.PLCWrite(STATE, "M264", "FF00");
+        //    }
+        //    SaveCSVfileBarcode(bar);
+        //}
+        //private void SaveCSVfileBarcode(string bar)
+        //{
+        //    string filepath = "D:\\生产记录\\条码" + GlobalVar.GetBanci() + ".csv";
+        //    if (!Directory.Exists("D:\\生产记录"))
+        //    {
+        //        Directory.CreateDirectory("D:\\生产记录");
+        //    }
+        //    try
+        //    {
+        //        if (!File.Exists(filepath))
+        //        {
+        //            string[] heads = { "Date", "Barcode"};
+        //            Csvfile.AddNewLine(filepath, heads);
+        //        }
+        //        string[] conte = { System.DateTime.Now.ToString(), bar };
+        //        Csvfile.AddNewLine(filepath, conte);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        GlobalVar.AddMessage(ex.Message);
+        //    }
+        //}
         private void SaveCSVfileAlarm(string alrstr)
         {
             string filepath = "D:\\报警记录\\报警记录" + GlobalVar.GetBanci() + ".csv";

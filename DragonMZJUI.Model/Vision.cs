@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ViewROI;
 using HalconDotNet;
 using System.IO;
+using BingLibrary.hjb.file;
 
 namespace DragonMZJUI.Model
 {
@@ -191,10 +192,17 @@ namespace DragonMZJUI.Model
                     window1.DispRegion(Rectangle11);
                     HTuple result_etch = cam1ProcedureCall2.GetOutputCtrlParamTuple("Result_etch");
                     HTuple result_blue = cam1ProcedureCall2.GetOutputCtrlParamTuple("Result_blue");
+                    HTuple result_barcode = cam1ProcedureCall2.GetOutputCtrlParamTuple("Result_barcode");
                     GlobalVar.AddMessage("蚀刻:");
                     foreach (int item in result_etch.IArr)
                     {
                         GlobalVar.AddMessage(item.ToString());
+                    }
+                    GlobalVar.AddMessage("条码:");
+                    foreach (string item in result_barcode.SArr)
+                    {
+                        GlobalVar.AddMessage(item);
+                        SaveCSVfileBarcode(item);
                     }
                     GlobalVar.AddMessage("蓝膜:");
                     foreach (int item in result_blue.IArr)
@@ -229,6 +237,27 @@ namespace DragonMZJUI.Model
             }
             catch(Exception ex) { GlobalVar.AddMessage(ex.Message); }
         }
-
+        private void SaveCSVfileBarcode(string bar)
+        {
+            string filepath = "D:\\生产记录\\条码" + GlobalVar.GetBanci() + ".csv";
+            if (!Directory.Exists("D:\\生产记录"))
+            {
+                Directory.CreateDirectory("D:\\生产记录");
+            }
+            try
+            {
+                if (!File.Exists(filepath))
+                {
+                    string[] heads = { "Date", "Barcode" };
+                    Csvfile.AddNewLine(filepath, heads);
+                }
+                string[] conte = { System.DateTime.Now.ToString(), bar };
+                Csvfile.AddNewLine(filepath, conte);
+            }
+            catch (Exception ex)
+            {
+                GlobalVar.AddMessage(ex.Message);
+            }
+        }
     }
 }
