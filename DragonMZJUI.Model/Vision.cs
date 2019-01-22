@@ -30,9 +30,9 @@ namespace DragonMZJUI.Model
                 HDevProgram myProgram = new HDevProgram(path + "\\Main.hdev");
                 //将过程挂载到视觉脚本
                 
-                cam1ProcedureCall1 = new HDevProcedureCall(new HDevProcedure(myProgram, "TileImage"));
+                //cam1ProcedureCall1 = new HDevProcedureCall(new HDevProcedure(myProgram, "TileImage"));
                 cam1ProcedureCall2 = new HDevProcedureCall(new HDevProcedure(myProgram, "HS9Operate"));
-                cam1ProcedureCall3 = new HDevProcedureCall(new HDevProcedure(myProgram, "TileImage3"));
+                //cam1ProcedureCall3 = new HDevProcedureCall(new HDevProcedure(myProgram, "TileImage3"));
                 OpenCameraAsync();
             }
             catch (Exception ex)
@@ -126,12 +126,10 @@ namespace DragonMZJUI.Model
             Image_2 = Framegrabber2.GrabImage();//拍照
             Image_3?.Dispose();
             Image_3 = Framegrabber3.GrabImage();//拍照
-            cam1ProcedureCall3.SetInputIconicParamObject("image1", Image_1);
-            cam1ProcedureCall3.SetInputIconicParamObject("image2", Image_2);
-            cam1ProcedureCall3.SetInputIconicParamObject("image3", Image_3);
-            cam1ProcedureCall3.Execute();
+            
             Image1?.Dispose();
-            Image1 = cam1ProcedureCall3.GetOutputIconicParamImage("TiledImage");
+            Image1 = Image_1.ConcatObj(Image_2).ConcatObj(Image_3).TileImages(3, "horizontal");
+
             GlobalVar.hWndCtrl.addIconicVar(Image1);
             GlobalVar.hWndCtrl.repaint();
         }
@@ -144,12 +142,9 @@ namespace DragonMZJUI.Model
             Image_2 = Framegrabber2.GrabImage();//拍照
             Image_3?.Dispose();
             Image_3 = Framegrabber3.GrabImage();//拍照
-            cam1ProcedureCall3.SetInputIconicParamObject("image1", Image_1);
-            cam1ProcedureCall3.SetInputIconicParamObject("image2", Image_2);
-            cam1ProcedureCall3.SetInputIconicParamObject("image3", Image_3);
-            cam1ProcedureCall3.Execute();
+
             Image2?.Dispose();
-            Image2 = cam1ProcedureCall3.GetOutputIconicParamImage("TiledImage");
+            Image2 = Image_1.ConcatObj(Image_2).ConcatObj(Image_3).TileImages(3, "horizontal");
             GlobalVar.hWndCtrl.addIconicVar(Image2);
             GlobalVar.hWndCtrl.repaint();
         }
@@ -166,6 +161,19 @@ namespace DragonMZJUI.Model
             }
             catch (Exception ex) { GlobalVar.AddMessage(ex.Message); }
         }
+        public void OpenImage2(string fullpath)
+        {
+            try
+            {
+                Image2?.Dispose();
+                Image2 = new HImage();
+                Image2.ReadImage(fullpath);
+                GlobalVar.hWndCtrl.addIconicVar(Image2);
+                GlobalVar.hWndCtrl.repaint();
+                GlobalVar.AddMessage("打开图片2");
+            }
+            catch (Exception ex) { GlobalVar.AddMessage(ex.Message); }
+        }
         public bool[] Result_etch, Result_blue;
         public void ProcessImage()
         {
@@ -175,11 +183,12 @@ namespace DragonMZJUI.Model
             {
                 if (Image1 != null && Image2 != null)
                 {
-                    cam1ProcedureCall1.SetInputIconicParamObject("image1", Image1);
-                    cam1ProcedureCall1.SetInputIconicParamObject("image2", Image2);
-                    cam1ProcedureCall1.Execute();
+
+
                     TiledImage?.Dispose();
-                    TiledImage = cam1ProcedureCall1.GetOutputIconicParamImage("TiledImage");
+
+                    TiledImage = Image1.ConcatObj(Image2).TileImages(1, "vertical");
+                    
                     GlobalVar.hWndCtrl.addIconicVar(TiledImage);
                     GlobalVar.hWndCtrl.repaint();
                     cam1ProcedureCall2.SetInputIconicParamObject("Image", TiledImage);//传入图像
@@ -194,23 +203,28 @@ namespace DragonMZJUI.Model
                     HTuple result_blue = cam1ProcedureCall2.GetOutputCtrlParamTuple("Result_blue");
                     HTuple result_barcode = cam1ProcedureCall2.GetOutputCtrlParamTuple("Result_barcode");
                     GlobalVar.AddMessage("蚀刻:");
-                    foreach (int item in result_etch.IArr)
+                    foreach (long item in result_etch.LArr)
                     {
                         GlobalVar.AddMessage(item.ToString());
                     }
                     GlobalVar.AddMessage("条码:");
-                    foreach (string item in result_barcode.SArr)
+                    try
                     {
-                        GlobalVar.AddMessage(item);
-                        SaveCSVfileBarcode(item);
+                        foreach (string item in result_barcode.SArr)
+                        {
+                            GlobalVar.AddMessage(item);
+                            SaveCSVfileBarcode(item);
+                        }
                     }
+                    catch { }
+
                     GlobalVar.AddMessage("蓝膜:");
-                    foreach (int item in result_blue.IArr)
+                    foreach (long item in result_blue.LArr)
                     {
                         GlobalVar.AddMessage(item.ToString());
                     }
                     GlobalVar.AddMessage("图像处理完成");
-                    for (int i = 0; i < Result_etch.Length && i < result_etch.IArr.Length && i < result_blue.IArr.Length; i++)
+                    for (int i = 0; i < Result_etch.Length && i < result_etch.LArr.Length && i < result_blue.LArr.Length; i++)
                     {
                         Result_etch[i] = result_etch[i];
                         Result_blue[i] = result_blue[i];
@@ -226,7 +240,7 @@ namespace DragonMZJUI.Model
 
                 GlobalVar.AddMessage(ex.Message);
             }
-
+            //GC.Collect();
         }
         public void SaveImage(string fullpath)
         {

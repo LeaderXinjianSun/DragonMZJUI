@@ -41,7 +41,7 @@ namespace DragonMZJUI.View
             PlcConnect.Fill =  GlobalVar.plc.Connect ? System.Windows.Media.Brushes.Green : System.Windows.Media.Brushes.Red;
             MsgTextBox.Text = GlobalVar.MessageStr;
             //OperatePageGrid.IsEnabled = GlobalVar.plc.vision.CCDStatus;
-            if (first && GlobalVar.plc.vision.CCDStatus)
+            if (first)
             {
                 first = false;
                 GlobalVar.plc.vision.window1 = GlobalVar.hWndCtrl.viewPort.HalconWindow;
@@ -83,13 +83,23 @@ namespace DragonMZJUI.View
             OpenFileDialog opf = new OpenFileDialog();
             opf.Title = "打开图片";
             opf.Filter = "图片文件(*.bmp)|*.bmp|所有文件(*.*)|*.*";
-            opf.InitialDirectory = @"E:\images";
+            //opf.InitialDirectory = @"E:\images";
             if (opf.ShowDialog() == DialogResult.OK)
             {
                 GlobalVar.plc.vision.OpenImage(opf.FileName);
             }
         }
-
+        private void OpenButtonClick2(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog opf = new OpenFileDialog();
+            opf.Title = "打开图片";
+            opf.Filter = "图片文件(*.bmp)|*.bmp|所有文件(*.*)|*.*";
+            //opf.InitialDirectory = @"E:\images";
+            if (opf.ShowDialog() == DialogResult.OK)
+            {
+                GlobalVar.plc.vision.OpenImage2(opf.FileName);
+            }
+        }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             GlobalVar.AlarmRecord.Add(new AlarmTableItem() { AlarmDate = System.DateTime.Now.ToString(), AlarmMessage="12323" });

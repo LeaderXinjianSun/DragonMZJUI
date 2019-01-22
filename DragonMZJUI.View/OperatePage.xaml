@@ -34,6 +34,7 @@
             <Button Click="GrapButtonClick2" Content="拍照2" Grid.Column="1" Width="60" Height="30"></Button>
             <Button Click="ProcessButtonClick" Content="处理" Grid.Row="1" Width="60" Height="30"></Button>
             <Button Click="OpenButtonClick" Content="打开" Grid.Row="2" Width="60" Height="30"></Button>
+            <Button Click="OpenButtonClick2" Content="打开2" Grid.Row="3" Width="60" Height="30"></Button>
             <Button Click="SaveButtonClick" Grid.Column="1" Content="保存" Grid.Row="2" Width="60" Height="30"></Button>
             <Button Click="ReOpenCameraButtonClick" Content="重连" Grid.Row="1" Grid.Column="1" Width="60" Height="30"></Button>
             <!--<Button Click="Button_Click" Content="重连" Grid.Row="3" Grid.Column="1" Width="60" Height="30"></Button>-->
