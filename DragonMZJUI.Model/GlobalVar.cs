@@ -15,6 +15,17 @@ namespace DragonMZJUI.Model
         public string UserID { set; get; }
         public string AlarmMessage { set; get; }
     }
+    public class MESDataItem
+    {
+        public string Date { set; get; }
+        public string Barcode { set; get; }
+        public string MachineID { set; get; }
+        public string UserID { set; get; }
+        public string ProductName { set; get; }
+        public string MachineName { set; get; }
+        public string FactoryArea { set; get; }
+        public string FactorySeparation { set; get; }
+    }
     public class GlobalVar
     {
         public static object obj = new object();
@@ -23,8 +34,15 @@ namespace DragonMZJUI.Model
         public static string MessageStr = "";
         public static ObservableCollection<AlarmTableItem> AlarmRecord = new ObservableCollection<AlarmTableItem>();
         public static Queue<AlarmTableItem> AlarmRecordQueue = new Queue<AlarmTableItem>();
+        public static ObservableCollection<MESDataItem> MESDataRecord = new ObservableCollection<MESDataItem>();
+        public static Queue<MESDataItem> MESDataRecordQueue = new Queue<MESDataItem>();
         public static string MachineID;
         public static string UserID;
+        public static string ProductName;
+        public static string MachineName;
+        public static string FactoryArea;
+        public static string FactorySeparation;
+        public static string MAC;
         public static void AddMessage(string str)
         {
             string[] s = MessageStr.Split('\n');

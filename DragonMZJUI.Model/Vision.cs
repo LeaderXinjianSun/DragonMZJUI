@@ -7,6 +7,8 @@ using ViewROI;
 using HalconDotNet;
 using System.IO;
 using BingLibrary.hjb.file;
+using System.Data;
+
 
 namespace DragonMZJUI.Model
 {
@@ -262,11 +264,14 @@ namespace DragonMZJUI.Model
             {
                 if (!File.Exists(filepath))
                 {
-                    string[] heads = { "Date", "Barcode" };
+                    string[] heads = { "Date", "Barcode", "MachineID", "UserID", "ProductName", "MachineName", "FactoryArea", "FactorySeparation" };
                     Csvfile.AddNewLine(filepath, heads);
                 }
-                string[] conte = { System.DateTime.Now.ToString(), bar };
+                string[] conte = { System.DateTime.Now.ToString(), bar, GlobalVar.MachineID, GlobalVar.UserID, GlobalVar.ProductName, GlobalVar.MachineName, GlobalVar.FactoryArea, GlobalVar.FactorySeparation };
                 Csvfile.AddNewLine(filepath, conte);
+                string pvalue = GlobalVar.MAC + "|" + GlobalVar.ProductName + "," + GlobalVar.UserID + "," + GlobalVar.MachineName + "," + GlobalVar.MachineID + "," + GlobalVar.FactoryArea + "," + GlobalVar.FactorySeparation + "," + bar;
+                DataSet ds = webServiceSZ.ws.getDataFromSer("test","test",GlobalVar.MachineID,"MWS01","MWS_ZX01", pvalue , System.DateTime.Now.ToShortDateString());
+                GlobalVar.AddMessage(ds.Tables[0].Rows[0].ItemArray[0].ToString());
             }
             catch (Exception ex)
             {

@@ -189,6 +189,7 @@ namespace DragonMZJUI.Model
         //        GlobalVar.AddMessage(ex.Message);
         //    }
         //}
+
         private void SaveCSVfileAlarm(string alrstr)
         {
             string filepath = "D:\\报警记录\\报警记录" + GlobalVar.GetBanci() + ".csv";
