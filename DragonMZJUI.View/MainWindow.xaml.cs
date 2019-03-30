@@ -47,6 +47,7 @@ namespace DragonMZJUI.View
                 Inifile.INIWriteValue(iniParameterPath, "System", "Banci", LastBanci);
                 //GlobalVar.AlarmRecordQueue.Clear();
                 GlobalVar.AlarmRecord.Clear();
+                GlobalVar.MESDataRecord.Clear();
                 GlobalVar.AddMessage("换班数据清空" + LastBanci);
             }
             if (GlobalVar.AlarmRecordQueue.Count > 0)
@@ -56,6 +57,14 @@ namespace DragonMZJUI.View
                     GlobalVar.AlarmRecord.Add(item);
                 }
                 GlobalVar.AlarmRecordQueue.Clear();
+            }
+            if (GlobalVar.MESDataRecordQueue.Count > 0)
+            {
+                foreach (MESDataItem item in GlobalVar.MESDataRecordQueue)
+                {
+                    GlobalVar.MESDataRecord.Add(item);
+                }
+                GlobalVar.MESDataRecordQueue.Clear();
             }
         }
         private void ReadAlarmRecordfromCSV()
@@ -99,11 +108,60 @@ namespace DragonMZJUI.View
                 
             }
         }
+        private void ReadBarcodeRecordfromCSV()
+        {
+            //"Date", "Barcode", "MachineID", "UserID", "ProductName", "MachineName", "FactoryArea", "FactorySeparation"
+            string filepath = "D:\\生产记录\\条码" + GlobalVar.GetBanci() + ".csv";
+            DataTable dt = new DataTable();
+            DataTable dt1;
+            dt.Columns.Add("Date", typeof(string));
+            dt.Columns.Add("Barcode", typeof(string));
+            dt.Columns.Add("MachineID", typeof(string));
+            dt.Columns.Add("UserID", typeof(string));
+
+            dt.Columns.Add("ProductName", typeof(string));
+            dt.Columns.Add("MachineName", typeof(string));
+            dt.Columns.Add("FactoryArea", typeof(string));
+            dt.Columns.Add("FactorySeparation", typeof(string));
+
+            try
+            {
+                if (File.Exists(filepath))
+                {
+                    dt1 = Csvfile.GetFromCsv(filepath, 1, dt);
+                    if (dt1.Rows.Count > 0)
+                    {
+                        foreach (DataRow item in dt1.Rows)
+                        {
+                            MESDataItem tr = new MESDataItem() { Date = item[0].ToString(), Barcode = item[1].ToString(), MachineID = item[2].ToString(), UserID = item[3].ToString(), ProductName = item[4].ToString(), MachineName = item[5].ToString(), FactoryArea = item[6].ToString(), FactorySeparation = item[7].ToString() };
+                            lock (GlobalVar.obj1)
+                            {
+                                //GlobalVar.AlarmRecord.Add(tr);
+                                GlobalVar.MESDataRecordQueue.Enqueue(tr);
+                            }
+                        }
+                        GlobalVar.AddMessage("读取条码记录完成");
+
+                    }
+                }
+                else
+                {
+                    GlobalVar.AddMessage("条码记录不存在");
+
+                }
+            }
+            catch (Exception ex)
+            {
+                GlobalVar.AddMessage(ex.Message);
+
+            }
+        }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {            
             GlobalVar.AddMessage("软件加载完成");
             GlobalVar.plc = new DeltaPLC();
             ReadAlarmRecordfromCSV();
+            ReadBarcodeRecordfromCSV();
         }
 
         private void ControlGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)

@@ -269,6 +269,12 @@ namespace DragonMZJUI.Model
                 }
                 string[] conte = { System.DateTime.Now.ToString(), bar, GlobalVar.MachineID, GlobalVar.UserID, GlobalVar.ProductName, GlobalVar.MachineName, GlobalVar.FactoryArea, GlobalVar.FactorySeparation };
                 Csvfile.AddNewLine(filepath, conte);
+                MESDataItem tr = new MESDataItem() { Date = System.DateTime.Now.ToString(), Barcode = bar, MachineID = GlobalVar.MachineID, UserID = GlobalVar.UserID, ProductName = GlobalVar.ProductName, MachineName = GlobalVar.MachineName, FactoryArea = GlobalVar.FactoryArea, FactorySeparation = GlobalVar.FactorySeparation };
+                lock (GlobalVar.obj1)
+                {
+                    //GlobalVar.AlarmRecord.Add(tr);
+                    GlobalVar.MESDataRecordQueue.Enqueue(tr);
+                }
                 string pvalue = GlobalVar.MAC + "|" + GlobalVar.ProductName + "," + GlobalVar.UserID + "," + GlobalVar.MachineName + "," + GlobalVar.MachineID + "," + GlobalVar.FactoryArea + "," + GlobalVar.FactorySeparation + "," + bar;
                 DataSet ds = webServiceSZ.ws.getDataFromSer("test","test",GlobalVar.MachineID,"MWS01","MWS_ZX01", pvalue , System.DateTime.Now.ToShortDateString());
                 GlobalVar.AddMessage(ds.Tables[0].Rows[0].ItemArray[0].ToString());

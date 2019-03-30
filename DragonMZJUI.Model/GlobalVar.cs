@@ -29,6 +29,7 @@ namespace DragonMZJUI.Model
     public class GlobalVar
     {
         public static object obj = new object();
+        public static object obj1 = new object();
         public static HWndCtrl hWndCtrl;
         public static ROIController rOIController;
         public static string MessageStr = "";
