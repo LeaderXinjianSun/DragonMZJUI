@@ -15,32 +15,43 @@
         </Grid.RowDefinitions>
         <TabControl>
             <TabItem Header="数据">
-                <DataGrid x:Name="MESDataRecord"></DataGrid>
+                <DataGrid x:Name="MESDataRecord" SelectionChanged="MESDataRecord_SelectionChanged"></DataGrid>
             </TabItem>
             <TabItem Header="报警">
                 <DataGrid x:Name="AlarmDataGrid"></DataGrid>
             </TabItem>
         </TabControl>
         <StackPanel Margin="5,0" Grid.Row="1" VerticalAlignment="Center" Orientation="Horizontal">
-            <TextBlock Text="MAC地址" Width="60" VerticalAlignment="Center"></TextBlock>
-            <TextBox Width="100" x:Name="MAC_Text"  VerticalAlignment="Center"></TextBox>
+            <TextBlock Text="MAC地址" Width="55" VerticalAlignment="Center"></TextBlock>
+            <TextBox Width="125" x:Name="MAC_Text"  VerticalAlignment="Center"></TextBox>
+            <TextBlock Text=" CCD" Width="30" VerticalAlignment="Center"></TextBlock>
+            <TextBox Width="55" x:Name="CCD_Text"  VerticalAlignment="Center"></TextBox>
+            <TextBlock Text="NNNN" Width="50" VerticalAlignment="Center"></TextBlock>
+            <TextBox Width="80" x:Name="NNNN_Text" VerticalAlignment="Center"></TextBox>
+            <TextBlock Text="料       号" Width="50" VerticalAlignment="Center"></TextBlock>
+            <TextBox Width="80" x:Name="ProductName_Text"  VerticalAlignment="Center"></TextBox>
+            
         </StackPanel>
         <StackPanel Margin="5,0" Grid.Row="2" VerticalAlignment="Center" Orientation="Horizontal">
-            <TextBlock Text="料号" Width="60" VerticalAlignment="Center"></TextBlock>
-            <TextBox Width="100" x:Name="ProductName_Text"  VerticalAlignment="Center"></TextBox>
-            <TextBlock Text="人员编号" Width="60" VerticalAlignment="Center"></TextBlock>
-            <TextBox Width="100" x:Name="UserID_Text" VerticalAlignment="Center"></TextBox>
-            <TextBlock Text="治具名称" Width="60" VerticalAlignment="Center"></TextBlock>
-            <TextBox Width="100" x:Name="MachineName_Text" VerticalAlignment="Center"></TextBox>
+            <TextBlock Text="线体编号" Width="55" VerticalAlignment="Center"></TextBlock>
+            <TextBox Width="80" x:Name="MachineID_Text"  VerticalAlignment="Center"></TextBox>
+            <TextBlock Text="人员工号" Width="50" VerticalAlignment="Center"></TextBlock>
+            <TextBox Width="80" x:Name="UserID_Text" VerticalAlignment="Center"></TextBox>
+            <TextBlock Text="治具名称" Width="50" VerticalAlignment="Center"></TextBlock>
+            <TextBox Width="80" x:Name="MachineName_Text" VerticalAlignment="Center"></TextBox>
+            <TextBlock Text="机台编号" Width="50" VerticalAlignment="Center"></TextBlock>
+            <TextBox Width="80" x:Name="ZhijuClass_Text"  VerticalAlignment="Center"></TextBox>
         </StackPanel>
         <StackPanel Margin="5,0" Grid.Row="3" VerticalAlignment="Center" Orientation="Horizontal">
-            <TextBlock Text="机台编号" Width="60" VerticalAlignment="Center"></TextBlock>
-            <TextBox Width="100" x:Name="MachineID_Text"  VerticalAlignment="Center"></TextBox>
-            <TextBlock Text="厂区" Width="60" VerticalAlignment="Center"></TextBlock>
-            <TextBox Width="100" x:Name="FactoryArea_Text" VerticalAlignment="Center"></TextBox>
-            <TextBlock Text="厂别" Width="60" VerticalAlignment="Center"></TextBlock>
-            <TextBox Width="100" x:Name="FactorySeparation_Text" VerticalAlignment="Center"></TextBox>
-            <Button Width="60" Margin="10,0,0,0" Click="IDSaveButton_Click" Content="保存"></Button>
+            <TextBlock Text="条码防呆" Width="55" VerticalAlignment="Center"></TextBlock>
+            <TextBox Width="80" x:Name="Barcodeproofing_Text"  VerticalAlignment="Center"></TextBox>
+            <TextBlock Text="厂       区" Width="50" VerticalAlignment="Center"></TextBlock>
+            <TextBox Width="80" x:Name="FactoryArea_Text" VerticalAlignment="Center"></TextBox>
+            <TextBlock Text="厂       别" Width="50" VerticalAlignment="Center"></TextBlock>
+            <TextBox Width="80" x:Name="FactorySeparation_Text" VerticalAlignment="Center"></TextBox>
+            <TextBlock Text="扫码类型" Width="50" VerticalAlignment="Center"></TextBlock>
+            <TextBox Width="80" x:Name="scancodetype_Text" VerticalAlignment="Center"></TextBox>
+            <Button Width="50" Margin="10,0,0,0" Click="IDSaveButton_Click" Content="保存"/>
         </StackPanel>
     </Grid>
 </UserControl>

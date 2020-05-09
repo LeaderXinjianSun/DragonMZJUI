@@ -20,20 +20,23 @@ namespace DragonMZJUI.Model
         public Vision vision;
         public Scan ScanC;
         public bool Connect = false;
+        int ReUpdateHour;
         public DeltaPLC()
         {
             
             COM = Inifile.INIGetStringValue(iniParameterPath, "System", "COM", "COM1");
             STATE = Inifile.INIGetStringValue(iniParameterPath, "System", "STATE", "01");
-            plc = new Delta_ModbusASCII(COM, 19200, System.IO.Ports.Parity.Even, 7, System.IO.Ports.StopBits.One);
+            plc = new Delta_ModbusASCII(COM, 9600, System.IO.Ports.Parity.Even, 7, System.IO.Ports.StopBits.One);
             ScanC = new Scan();
             string ScanCom = Inifile.INIGetStringValue(iniParameterPath, "System", "扫码枪串口", "COM1");
+            ReUpdateHour = int.Parse(Inifile.INIGetStringValue(iniParameterPath, "System", "ReUpdateHour", "0"));
             //ScanC.ini(ScanCom);
             //ScanC.Connect();
             PlcRun();
             vision = new Vision();
-            
 
+            //plc.PLCWriteBit(STATE, "M3111", "0006", "3E");
+           // GlobalVar.AddMessage("蚀刻信息已写入PLC");
         }
         async void PlcRun()
         {
@@ -59,6 +62,15 @@ namespace DragonMZJUI.Model
             while (true)
             {
                 await Task.Delay(QuestCycle);
+                if (DateTime.Now.Hour % 2 == 0)
+                {
+                    if (DateTime.Now.Hour != ReUpdateHour)
+                    {
+                        ReUpdateHour = DateTime.Now.Hour;
+                        Inifile.INIWriteValue(iniParameterPath, "System", "ReUpdateHour", ReUpdateHour.ToString());
+                        GlobalVar.plc.vision.ReUploadAction();
+                    }
+                }
                 Task task = Task.Run(() =>
                 {
                     try
@@ -68,36 +80,50 @@ namespace DragonMZJUI.Model
                         {
                             //拍照1
                             System.Threading.Thread.Sleep(20);                            
-                            if (plc.ReadM(STATE, "M120"))
+                            if (plc.ReadM(STATE, "M3000"))
                             {
+                                plc.PLCWrite(STATE, "M3100", "0000");
                                 GlobalVar.AddMessage("触发拍照1");
                                 System.Threading.Thread.Sleep(20);
-                                plc.PLCWrite(STATE, "M120", "0000");
+                                plc.PLCWrite(STATE, "M3000", "0000");
                                 System.Threading.Thread.Sleep(20);
-                                plc.PLCWrite(STATE, "M980", "0000");
+                                plc.PLCWrite(STATE, "M3002", "0000");
                                 GlobalVar.plc.vision.GetImage1();
-                                plc.PLCWrite(STATE, "M980", "FF00");
+                                plc.PLCWrite(STATE, "M3002", "FF00");
                             }
                             //拍照2
                             System.Threading.Thread.Sleep(20);
-                            if (plc.ReadM(STATE, "M982"))
+                            if (plc.ReadM(STATE, "M3001"))
                             {
                                 GlobalVar.AddMessage("触发拍照2");
                                 System.Threading.Thread.Sleep(20);
-                                plc.PLCWrite(STATE, "M982", "0000");
+                                plc.PLCWrite(STATE, "M3001", "0000");
                                 System.Threading.Thread.Sleep(20);
-                                plc.PLCWrite(STATE, "M129", "0000");
+                                
+                                plc.PLCWrite(STATE, "M3003", "0000");
                                 GlobalVar.plc.vision.GetImage2();
+                                plc.PLCWrite(STATE, "M3003", "FF00");
                                 GlobalVar.plc.vision.ProcessImage();
                                 string Str_Result_etch = GetCoilStr(GlobalVar.plc.vision.Result_etch);
                                 System.Threading.Thread.Sleep(20);
-                                plc.PLCWriteBit(STATE, "M2213", "000A", Str_Result_etch);
-                                string Str_Result_blue = GetCoilStr(GlobalVar.plc.vision.Result_blue);
+                                plc.PLCWriteBit(STATE, "M3101", "0006", Str_Result_etch);
+                                GlobalVar.AddMessage("蚀刻信息已写入PLC");
+                                //string Str_Result_blue = GetCoilStr(GlobalVar.plc.vision.Result_blue);
+                                //System.Threading.Thread.Sleep(20);
+                                //plc.PLCWriteBit(STATE, "M121", "000A", Str_Result_blue);
+
+
+                                string Str_Result_barcode = GetCoilStr(GlobalVar.plc.vision.Result_barcode);
                                 System.Threading.Thread.Sleep(20);
-                                plc.PLCWriteBit(STATE, "M2201", "000A", Str_Result_blue);
-                                System.Threading.Thread.Sleep(20);
-                                plc.PLCWrite(STATE, "M129", "FF00");
-                                GlobalVar.AddMessage("拍照结果写入PLC");
+                                plc.PLCWriteBit(STATE, "M3111", "0006", Str_Result_barcode);
+                                GlobalVar.AddMessage("扫码信息已写入PLC");
+
+
+
+
+
+                                plc.PLCWrite(STATE, "M3100", "FF00");
+                                GlobalVar.AddMessage("本次处理完成");
                             }
                             //if (plc.ReadM(STATE, "M260"))
                             //{

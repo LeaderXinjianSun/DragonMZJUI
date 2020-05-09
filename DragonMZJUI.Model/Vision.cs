@@ -8,6 +8,7 @@ using HalconDotNet;
 using System.IO;
 using BingLibrary.hjb.file;
 using System.Data;
+using System.Runtime.Serialization.Formatters.Binary;
 
 
 namespace DragonMZJUI.Model
@@ -17,6 +18,9 @@ namespace DragonMZJUI.Model
         public HWindow window1;
         public HDevEngine myEngine = new HDevEngine();
         public HDevProcedureCall cam1ProcedureCall1, cam1ProcedureCall2, cam1ProcedureCall3;
+
+
+
         public bool CCDStatus = false;
         //C:/Program Files/MVTec/HALCON-13.0/procedures/
         public Vision()
@@ -176,11 +180,13 @@ namespace DragonMZJUI.Model
             }
             catch (Exception ex) { GlobalVar.AddMessage(ex.Message); }
         }
-        public bool[] Result_etch, Result_blue;
+        public bool[] Result_etch, Result_blue, Result_barcode;
+        HTuple result_barcode;
         public void ProcessImage()
         {
-            Result_etch = new bool[10];
-            Result_blue = new bool[10];
+            Result_etch = new bool[6];
+            Result_blue = new bool[6];
+            Result_barcode = new bool[6];
             try
             {
                 if (Image1 != null && Image2 != null)
@@ -188,7 +194,6 @@ namespace DragonMZJUI.Model
 
 
                     TiledImage?.Dispose();
-
                     TiledImage = Image1.ConcatObj(Image2).TileImages(1, "vertical");
                     
                     GlobalVar.hWndCtrl.addIconicVar(TiledImage);
@@ -203,33 +208,66 @@ namespace DragonMZJUI.Model
                     window1.DispRegion(Rectangle11);
                     HTuple result_etch = cam1ProcedureCall2.GetOutputCtrlParamTuple("Result_etch");
                     HTuple result_blue = cam1ProcedureCall2.GetOutputCtrlParamTuple("Result_blue");
-                    HTuple result_barcode = cam1ProcedureCall2.GetOutputCtrlParamTuple("Result_barcode");
+                    //HTuple result_barcode = cam1ProcedureCall2.GetOutputCtrlParamTuple("Result_barcode");
+                    result_barcode = cam1ProcedureCall2.GetOutputCtrlParamTuple("Result_barcode");
                     GlobalVar.AddMessage("蚀刻:");
                     foreach (long item in result_etch.LArr)
                     {
-                        GlobalVar.AddMessage(item.ToString());
+                        if (item == 0)
+                            GlobalVar.AddMessage(item.ToString() + "OK");
+                        else
+                            GlobalVar.AddMessage(item.ToString() + "NG");
                     }
                     GlobalVar.AddMessage("条码:");
+
+                    try
+                    {
+                        int index = 0;
+                        foreach (string item in result_barcode.SArr)
+                        {
+                            if (item != "error")
+                            {
+                                Result_barcode[index] = false;
+                            }
+                            else
+                            {
+                                Result_barcode[index] = true;
+                            }
+                            index++;
+
+                        }
+                    }
+                   
+                    catch(Exception ex)
+                    {
+                        GlobalVar.AddMessage(ex.Message);
+                    }
+
+
+                  UploadBarcode();
                     try
                     {
                         foreach (string item in result_barcode.SArr)
                         {
+                            System.Threading.Thread.Sleep(1000);
                             GlobalVar.AddMessage(item);
-                            SaveCSVfileBarcode(item);
+                            //SaveCSVfileBarcode(item);
                         }
                     }
                     catch { }
-
                     GlobalVar.AddMessage("蓝膜:");
                     foreach (long item in result_blue.LArr)
                     {
-                        GlobalVar.AddMessage(item.ToString());
+                        if (item == 1)
+                            GlobalVar.AddMessage(item.ToString() + "NG");
+                        else
+                            GlobalVar.AddMessage(item.ToString() + "OK");
                     }
                     GlobalVar.AddMessage("图像处理完成");
-                    for (int i = 0; i < Result_etch.Length && i < result_etch.LArr.Length && i < result_blue.LArr.Length; i++)
+                    for (int i = 0; i < result_etch.LArr.Length; i++)// i < Result_etch.Length && i < result_etch.LArr.Length && i < result_blue.LArr.Length; i++)
                     {
                         Result_etch[i] = result_etch[i];
-                        Result_blue[i] = result_blue[i];
+                        //Result_blue[i] = result_blue[i];
                     }
                 }
                 else
@@ -253,36 +291,160 @@ namespace DragonMZJUI.Model
             }
             catch(Exception ex) { GlobalVar.AddMessage(ex.Message); }
         }
-        private void SaveCSVfileBarcode(string bar)
+        private void SaveCSVfileBarcode(string bar,int index)
         {
-            string filepath = "D:\\生产记录\\条码" + GlobalVar.GetBanci() + ".csv";
-            if (!Directory.Exists("D:\\生产记录"))
+            string filepath = "F:\\生产记录\\条码" + GlobalVar.GetBanci() + ".csv";
+            if (!Directory.Exists("F:\\生产记录"))
             {
-                Directory.CreateDirectory("D:\\生产记录");
+                Directory.CreateDirectory("F:\\生产记录");
             }
             try
             {
                 if (!File.Exists(filepath))
                 {
-                    string[] heads = { "Date", "Barcode", "MachineID", "UserID", "ProductName", "MachineName", "FactoryArea", "FactorySeparation" };
+                    string[] heads = { "Date","Index", "Barcode", "MachineID", "UserID", "ProductName", "MachineName", "FactoryArea", "FactorySeparation", "ZhijuClass", "Barcodeproofing", "scancodetype","CCD" ,"NNNN",};
                     Csvfile.AddNewLine(filepath, heads);
                 }
-                string[] conte = { System.DateTime.Now.ToString(), bar, GlobalVar.MachineID, GlobalVar.UserID, GlobalVar.ProductName, GlobalVar.MachineName, GlobalVar.FactoryArea, GlobalVar.FactorySeparation };
+                string[] conte = { System.DateTime.Now.ToString(),index.ToString(), bar, GlobalVar.MachineID, GlobalVar.UserID, GlobalVar.ProductName, GlobalVar.MachineName, GlobalVar.FactoryArea, GlobalVar.FactorySeparation, GlobalVar.ZhijuClass, GlobalVar.Barcodeproofing, GlobalVar.scancodetype, GlobalVar.CCD, GlobalVar.NNNN, };
                 Csvfile.AddNewLine(filepath, conte);
-                MESDataItem tr = new MESDataItem() { Date = System.DateTime.Now.ToString(), Barcode = bar, MachineID = GlobalVar.MachineID, UserID = GlobalVar.UserID, ProductName = GlobalVar.ProductName, MachineName = GlobalVar.MachineName, FactoryArea = GlobalVar.FactoryArea, FactorySeparation = GlobalVar.FactorySeparation };
+
+                MESDataItem tr = new MESDataItem() { Date = System.DateTime.Now.ToString(),Index = index.ToString(), Barcode = bar, MachineID = GlobalVar.MachineID, UserID = GlobalVar.UserID, ProductName = GlobalVar.ProductName, MachineName = GlobalVar.MachineName, FactoryArea = GlobalVar.FactoryArea, FactorySeparation = GlobalVar.FactorySeparation, ZhijuClass = GlobalVar.ZhijuClass, Barcodeproofing = GlobalVar.Barcodeproofing, scancodetype = GlobalVar.scancodetype, CCD = GlobalVar.CCD, NNNN = GlobalVar.NNNN, };
                 lock (GlobalVar.obj1)
                 {
-                    //GlobalVar.AlarmRecord.Add(tr);
+                    // GlobalVar.AlarmRecord.Add(tr);
                     GlobalVar.MESDataRecordQueue.Enqueue(tr);
                 }
-                string pvalue = GlobalVar.MAC + "|" + GlobalVar.ProductName + "," + GlobalVar.UserID + "," + GlobalVar.MachineName + "," + GlobalVar.MachineID + "," + GlobalVar.FactoryArea + "," + GlobalVar.FactorySeparation + "," + bar;
-                DataSet ds = webServiceSZ.ws.getDataFromSer("test","test",GlobalVar.MachineID,"MWS01","MWS_ZX01", pvalue , System.DateTime.Now.ToShortDateString());
+                string para1 = GlobalVar.MAC + "|"+ GlobalVar.CCD + "," + GlobalVar.NNNN + "," + GlobalVar.ProductName + "," + GlobalVar.MachineID + "," + GlobalVar.UserID + "," + GlobalVar.MachineName + "," + GlobalVar.ZhijuClass + "," + GlobalVar.Barcodeproofing + "," + GlobalVar.FactoryArea + "," + GlobalVar.FactorySeparation + "," + GlobalVar.scancodetype + "," + bar;
+                //进程锁住，防止与自动重传操作冲突
+                lock (GlobalVar.obj2)
+                {
+                    DataSet ds = webServiceSZ.ws.getDataFromSer("MAC", "MAC", GlobalVar.MachineID, "MWS01", "MWS_ZX01", para1, System.DateTime.Now.ToShortDateString());
+                GlobalVar.AddMessage("上传信息;"+ para1);
                 GlobalVar.AddMessage(ds.Tables[0].Rows[0].ItemArray[0].ToString());
+                    if (!ds.Tables[0].Rows[0].ItemArray[0].ToString().Contains("OK"))
+                    {
+                        string configPath = System.Environment.CurrentDirectory + "\\ReUpdateData.config";
+                        if (File.Exists(configPath))
+                        {
+                            try
+                            {
+                                //如果文件存在则先读出来
+                                FileStream fileStream = new FileStream(configPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                                BinaryFormatter mBinFmat = new BinaryFormatter();
+                                UploadData Ud = mBinFmat.Deserialize(fileStream) as UploadData;
+                                fileStream.Close();
+                                //追加记录，并覆盖原文件
+                                Ud.ReUpdate.Add(new Tuple<string, DateTime>(para1, DateTime.Now));
+                                fileStream = new FileStream(configPath, FileMode.Create);
+                                BinaryFormatter b = new BinaryFormatter();
+                                b.Serialize(fileStream, Ud);
+                                fileStream.Close();
+                                GlobalVar.AddMessage(bar + " 上传失败，保存到本地");
+                            }
+            catch (Exception ex)
+            {
+                GlobalVar.AddMessage(ex.Message);
+            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                //如果文件不存在则直接创建
+                                UploadData Ud = new UploadData();
+                                Ud.ReUpdate.Add(new Tuple<string, DateTime>(para1, DateTime.Now));
+                                FileStream fileStream = new FileStream(configPath, FileMode.Create);
+                                BinaryFormatter b = new BinaryFormatter();
+                                b.Serialize(fileStream, Ud);
+                                fileStream.Close();
+                                GlobalVar.AddMessage(bar + " 上传失败，保存到本地");
+                            }
+                            catch (Exception ex)
+                            {
+                                GlobalVar.AddMessage(ex.Message);
+                            }
+                        }
+
+                    }
+                }
             }
             catch (Exception ex)
             {
                 GlobalVar.AddMessage(ex.Message);
             }
+
+        }
+        public async void ReUploadAction()
+        {
+            Task UploadBarcode = Task.Run(() =>
+            {
+                try
+                {
+                    string configPath = System.Environment.CurrentDirectory + "\\ReUpdateData.config";
+                    if (File.Exists(configPath))
+                    {
+                        try
+                        {
+                            //进程锁住，防止与正在上传的操作冲突
+                            lock (GlobalVar.obj2)
+                            {
+                                FileStream fileStream = new FileStream(configPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                                BinaryFormatter mBinFmat = new BinaryFormatter();
+                                UploadData Ud = mBinFmat.Deserialize(fileStream) as UploadData;
+                                fileStream.Close();
+                                foreach (var item in Ud.ReUpdate)
+                                {
+                                    lock (GlobalVar.obj2)
+                                    {
+                                        DataSet ds = webServiceSZ.ws.getDataFromSer("MAC", "MAC", GlobalVar.MachineID, "MWS01", "MWS_ZX01", item.Item1, item.Item2.ToString());
+                                        GlobalVar.AddMessage("重传信息;" + item.Item1);
+                                        GlobalVar.AddMessage(ds.Tables[0].Rows[0].ItemArray[0].ToString());
+                                        if (ds.Tables[0].Rows[0].ItemArray[0].ToString().Contains("OK"))
+                                        {
+                                            Ud.ReUpdate.Remove(item);
+                                        }
+                                    }
+                                    System.Threading.Thread.Sleep(1000);
+                                }
+                                fileStream = new FileStream(configPath, FileMode.Create);
+                                BinaryFormatter b = new BinaryFormatter();
+                                b.Serialize(fileStream, Ud);
+                                fileStream.Close();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            GlobalVar.AddMessage(ex.Message);
+                        }
+                    }
+                }
+                catch { }
+            });
+            await UploadBarcode;
+        }
+
+        public async  void UploadBarcode()
+        {
+            Task UploadBarcode = Task.Run(() => 
+            {
+                try
+                {
+                    int index = 1;
+                    foreach (string item in result_barcode.SArr)
+                    {
+                        System.Threading.Thread.Sleep(1000);
+                        GlobalVar.AddMessage(item);
+                        {
+                            if (item != "error")
+                                SaveCSVfileBarcode(item, index);
+                            index++;
+
+                        }
+                        }
+                    }
+                catch { }
+            });
+            await UploadBarcode;
         }
     }
 }

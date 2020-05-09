@@ -123,7 +123,11 @@ namespace DragonMZJUI.View
             dt.Columns.Add("MachineName", typeof(string));
             dt.Columns.Add("FactoryArea", typeof(string));
             dt.Columns.Add("FactorySeparation", typeof(string));
-
+            dt.Columns.Add("ZhiJuClass", typeof(string));
+            dt.Columns.Add("Barcodeproofing", typeof(string));
+            dt.Columns.Add("scancodetype", typeof(string));
+            dt.Columns.Add("CCD", typeof(string));
+            dt.Columns.Add("NNNN", typeof(string));
             try
             {
                 if (File.Exists(filepath))
@@ -133,7 +137,7 @@ namespace DragonMZJUI.View
                     {
                         foreach (DataRow item in dt1.Rows)
                         {
-                            MESDataItem tr = new MESDataItem() { Date = item[0].ToString(), Barcode = item[1].ToString(), MachineID = item[2].ToString(), UserID = item[3].ToString(), ProductName = item[4].ToString(), MachineName = item[5].ToString(), FactoryArea = item[6].ToString(), FactorySeparation = item[7].ToString() };
+                            MESDataItem tr = new MESDataItem() { Date = item[0].ToString(),Index = item[1].ToString(), Barcode = item[2].ToString(), MachineID = item[3].ToString(), UserID = item[4].ToString(), ProductName = item[5].ToString(), MachineName = item[6].ToString(), FactoryArea = item[7].ToString(), FactorySeparation = item[8].ToString() };
                             lock (GlobalVar.obj1)
                             {
                                 //GlobalVar.AlarmRecord.Add(tr);

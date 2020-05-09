@@ -205,9 +205,9 @@ namespace SxjLibrary
                                 mSerialPort.ReadExisting();
                                 mSerialPort.Write(START_DECODE, 0, START_DECODE.Length);
 
-                                //BarCode = mSerialPort.ReadTo("\r");
+                            BarCode = mSerialPort.ReadTo("\r");
 
-                                int mCount = mSerialPort.BytesToRead;
+                            int mCount = mSerialPort.BytesToRead;
                                 int mtiemout = 0;
                                 while (mCount == 0)
                                 {

@@ -18,6 +18,7 @@ namespace DragonMZJUI.Model
     public class MESDataItem
     {
         public string Date { set; get; }
+        public string Index { set; get; }
         public string Barcode { set; get; }
         public string MachineID { set; get; }
         public string UserID { set; get; }
@@ -25,11 +26,17 @@ namespace DragonMZJUI.Model
         public string MachineName { set; get; }
         public string FactoryArea { set; get; }
         public string FactorySeparation { set; get; }
+        public string ZhijuClass { set; get; }
+        public string Barcodeproofing { set; get; }
+        public string scancodetype { set; get; }
+        public string CCD { set; get; }
+        public string NNNN { set; get; }
     }
     public class GlobalVar
     {
         public static object obj = new object();
         public static object obj1 = new object();
+        public static object obj2 = new object();
         public static HWndCtrl hWndCtrl;
         public static ROIController rOIController;
         public static string MessageStr = "";
@@ -43,7 +50,12 @@ namespace DragonMZJUI.Model
         public static string MachineName;
         public static string FactoryArea;
         public static string FactorySeparation;
+        public static string ZhijuClass;
+        public static string Barcodeproofing;
+        public static string scancodetype;
         public static string MAC;
+        public static string CCD;
+        public static string NNNN;
         public static void AddMessage(string str)
         {
             string[] s = MessageStr.Split('\n');
@@ -79,5 +91,14 @@ namespace DragonMZJUI.Model
         }
         public static DeltaPLC plc;
 
+    }
+    [Serializable]
+    public class UploadData
+    {
+        public UploadData()
+        {
+            ReUpdate = new List<Tuple<string, DateTime>>();
+        }
+        public List<Tuple<string, DateTime>> ReUpdate;
     }
 }

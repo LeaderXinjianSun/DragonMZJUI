@@ -78,8 +78,14 @@ namespace DragonMZJUI.View
                 GlobalVar.plc.vision.SaveImage(svf.FileName);
             }
         }
+
+
+       
+     
+
         private void OpenButtonClick(object sender, RoutedEventArgs e)
         {
+          
             OpenFileDialog opf = new OpenFileDialog();
             opf.Title = "打开图片";
             opf.Filter = "图片文件(*.bmp)|*.bmp|所有文件(*.*)|*.*";
