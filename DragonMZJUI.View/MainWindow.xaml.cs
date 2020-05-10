@@ -163,6 +163,21 @@ namespace DragonMZJUI.View
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {            
             GlobalVar.AddMessage("软件加载完成");
+            try
+            {
+                SXJLibrary.Oracle oraDB = new SXJLibrary.Oracle("szdb10.eavarytech.com", "fksfcdb3", "ictdata", "ict*1");
+                if (oraDB.isConnect())
+                {
+                    string oracletime = oraDB.OraclDateTime();
+                    GlobalVar.AddMessage("同步数据库时间" + oracletime);
+                }
+                oraDB.disconnect();
+            }
+            catch (Exception ex)
+            {
+
+                GlobalVar.AddMessage(ex.Message);
+            }
             GlobalVar.plc = new DeltaPLC();
             ReadAlarmRecordfromCSV();
             ReadBarcodeRecordfromCSV();

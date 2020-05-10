@@ -227,7 +227,32 @@ namespace DragonMZJUI.Model
                         {
                             if (item != "error")
                             {
-                                Result_barcode[index] = false;
+                                SXJLibrary.Oracle oraDB = new SXJLibrary.Oracle("szdb10.eavarytech.com", "fksfcdb3", "ictdata", "ict*1");
+                                if (oraDB.isConnect())
+                                {
+                                    string stm = string.Format("SELECT * FROM UT_DATA  WHERE BARCODE = '{0}' ORDER BY TESTDATE DESC,TESTTIME DESC", item);
+                                    DataSet ds = oraDB.executeQuery(stm);
+                                    DataTable dt = ds.Tables["table0"];
+                                    if (dt.Rows.Count > 0)
+                                    {
+                                        GlobalVar.AddMessage(item + " " + (string)dt.Rows[0]["TRESULT"]);
+                                        if ((string)dt.Rows[0]["TRESULT"] == "PASS")
+                                        {                                            
+                                            Result_barcode[index] = false;
+                                        }
+                                        else
+                                        {
+                                            Result_barcode[index] = true;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        GlobalVar.AddMessage(item + "无电测记录");
+                                        Result_barcode[index] = true;
+                                    }
+                                }
+                                oraDB.disconnect();
+                                
                             }
                             else
                             {
@@ -237,14 +262,14 @@ namespace DragonMZJUI.Model
 
                         }
                     }
-                   
-                    catch(Exception ex)
+
+                    catch (Exception ex)
                     {
                         GlobalVar.AddMessage(ex.Message);
                     }
 
 
-                  UploadBarcode();
+                    UploadBarcode();
                     try
                     {
                         foreach (string item in result_barcode.SArr)
